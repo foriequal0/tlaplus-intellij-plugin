@@ -7,5 +7,6 @@ out
 .gradle
 gen/
 libs/*
+.intellijPlatform
 
 !.gitkeep

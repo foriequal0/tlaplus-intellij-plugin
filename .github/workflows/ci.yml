@@ -25,20 +25,11 @@ jobs:
       uses: actions/setup-java@v1
       with:
          java-version: 17
-    - name: Prepare for test
-      uses: gradle/gradle-build-action@v2
-      with:
-        arguments: listProductsReleases
     - name: Execute test
       uses: gradle/gradle-build-action@v2
       with:
         arguments: check
-    - name: Setup Plugin Verifier IDEs Cache
-      uses: actions/cache@v4
-      with:
-        path: ~/.pluginVerifier/ides
-        key: plugin-verifier-${{ hashFiles('build/listProductsReleases.txt') }}
     - name: Run Plugin Verification tasks
       uses: gradle/gradle-build-action@v2
       with:
-        arguments: runPluginVerifier -Pplugin.verifier.home.dir=~/.pluginVerifier/ides
+        arguments: verifyPlugin
