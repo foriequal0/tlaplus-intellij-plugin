@@ -79,63 +79,38 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-task generateTLAplusLexer(type: GenerateLexerTask) {
-    sourceFile.set(file("src/main/grammar/tlaplus.flex"))
-    targetOutputDir.set(layout.projectDirectory.dir("src/gen/com/mayreh/intellij/plugin/tlaplus/lexer"))
-    purgeOldFiles.set(true)
+def lexers = [
+    [component: "tlaplus", flex: "tlaplus.flex", class: "_TLAplusLexer"],
+    [component: "tlaplus", flex: "tlaplus_modulebegin.flex", class: "_TLAplusModuleBeginLexer"],
+    [component: "tlaplus", flex: "tlaplus_plus_cal_comment.flex", class: "_TLAplusPlusCalCommentLexer"],
+    [component: "tlaplus/tlc", flex: "tlc_error_trace.flex", class: "_TLCErrorTraceLexer"],
+    [component: "tlc", flex: "tlc_config.flex", class: "_TLCConfigLexer"],
+    [component: "pluscal", flex: "plus_cal_algorithmbegin.flex", class: "_PlusCalAlgorithmBeginLexer"],
+]
+
+def parsers = [
+    [component: "tlaplus", bnf: "tlaplus.bnf", class: "TLAplusParser"],
+    [component: "tlc", bnf: "tlc_config.bnf", class: "TLCConfigParser"]
+]
+
+def lexerTasks = lexers.collect { spec ->
+    tasks.register("generate" + spec.class, GenerateLexerTask) {
+        sourceFile.set(layout.projectDirectory.file("src/main/grammar/${spec.flex}"))
+        targetRootOutputDir.set(layout.projectDirectory.dir("src/gen"))
+        pathToClass.set("com/mayreh/intellij/plugin/${spec.component}/lexer/${spec.class}.java")
+    }
 }
 
-task generateTLAplusModuleBeginLexer(type: GenerateLexerTask) {
-    sourceFile.set(file("src/main/grammar/tlaplus_modulebegin.flex"))
-    targetOutputDir.set(layout.projectDirectory.dir("src/gen/com/mayreh/intellij/plugin/tlaplus/lexer"))
+def parserTasks = parsers.collect { spec ->
+    tasks.register("generate" + spec.class, GenerateParserTask) {
+        sourceFile.set(layout.projectDirectory.file("src/main/grammar/${spec.bnf}"))
+        targetRootOutputDir.set(layout.projectDirectory.dir("src/gen"))
+        pathToParser.set("com/mayreh/intellij/plugin/${spec.component}/parser/${spec.class}.java")
+        pathToPsiRoot.set("com/mayreh/intellij/plugin/${spec.component}/psi")
+    }
 }
 
-task generateTLAplusPlusCalCommentLexer(type: GenerateLexerTask) {
-    sourceFile.set(file("src/main/grammar/tlaplus_plus_cal_comment.flex"))
-    targetOutputDir.set(layout.projectDirectory.dir("src/gen/com/mayreh/intellij/plugin/tlaplus/lexer"))
-}
-
-task generateTLCErrorTraceLexer(type: GenerateLexerTask) {
-    sourceFile.set(file("src/main/grammar/tlc_error_trace.flex"))
-    targetOutputDir.set(layout.projectDirectory.dir("src/gen/com/mayreh/intellij/plugin/tlaplus/tlc/lexer"))
-    purgeOldFiles.set(true)
-}
-
-task generateTLAplusParser(type: GenerateParserTask) {
-    sourceFile.set(file("src/main/grammar/tlaplus.bnf"))
-    targetRootOutputDir.set(layout.projectDirectory.dir("src/gen"))
-    pathToParser.set("/com/mayreh/intellij/plugin/tlaplus/parser/TLAplusParser.java")
-    pathToPsiRoot.set("/com/mayreh/intellij/plugin/tlaplus/psi")
-    purgeOldFiles.set(true)
-}
-
-task generateTLCConfigParser(type: GenerateParserTask) {
-    sourceFile.set(file("src/main/grammar/tlc_config.bnf"))
-    targetRootOutputDir.set(layout.projectDirectory.dir("src/gen"))
-    pathToParser.set("/com/mayreh/intellij/plugin/tlc/parser/TLCConfigParser.java")
-    pathToPsiRoot.set("/com/mayreh/intellij/plugin/tlc/psi")
-}
-
-task generateTLCConfigLexer(type: GenerateLexerTask) {
-    sourceFile.set(file("src/main/grammar/tlc_config.flex"))
-    targetOutputDir.set(layout.projectDirectory.dir("src/gen/com/mayreh/intellij/plugin/tlc/lexer"))
-}
-
-task generatePlusCalAlgorithmBeginLexer(type: GenerateLexerTask) {
-    sourceFile.set(file("src/main/grammar/plus_cal_algorithmbegin.flex"))
-    targetOutputDir.set(layout.projectDirectory.dir("src/gen/com/mayreh/intellij/plugin/pluscal/lexer"))
-    purgeOldFiles.set(true)
-}
-
-compileJava.dependsOn(
-        generateTLAplusLexer,
-        generateTLAplusModuleBeginLexer,
-        generateTLAplusPlusCalCommentLexer,
-        generateTLCErrorTraceLexer,
-        generateTLAplusParser,
-        generateTLCConfigParser,
-        generateTLCConfigLexer,
-        generatePlusCalAlgorithmBeginLexer)
+compileJava.dependsOn(lexerTasks, parserTasks)
 
 tasks.withType(Test) {
     testLogging {
