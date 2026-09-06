@@ -68,16 +68,12 @@ intellijPlatform {
     }
 }
 
-sourceSets {
-    main {
-        java.srcDirs("src/gen")
-    }
-}
-
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
+
+def generatedRoot = layout.buildDirectory.dir("generated/sources/grammar")
 
 def lexers = [
     [component: "tlaplus", flex: "tlaplus.flex", class: "_TLAplusLexer"],
@@ -96,7 +92,7 @@ def parsers = [
 def lexerTasks = lexers.collect { spec ->
     tasks.register("generate" + spec.class, GenerateLexerTask) {
         sourceFile.set(layout.projectDirectory.file("src/main/grammar/${spec.flex}"))
-        targetRootOutputDir.set(layout.projectDirectory.dir("src/gen"))
+        targetRootOutputDir.set(generatedRoot)
         pathToClass.set("com/mayreh/intellij/plugin/${spec.component}/lexer/${spec.class}.java")
     }
 }
@@ -104,13 +100,18 @@ def lexerTasks = lexers.collect { spec ->
 def parserTasks = parsers.collect { spec ->
     tasks.register("generate" + spec.class, GenerateParserTask) {
         sourceFile.set(layout.projectDirectory.file("src/main/grammar/${spec.bnf}"))
-        targetRootOutputDir.set(layout.projectDirectory.dir("src/gen"))
+        targetRootOutputDir.set(generatedRoot)
         pathToParser.set("com/mayreh/intellij/plugin/${spec.component}/parser/${spec.class}.java")
         pathToPsiRoot.set("com/mayreh/intellij/plugin/${spec.component}/psi")
     }
 }
 
-compileJava.dependsOn(lexerTasks, parserTasks)
+sourceSets {
+    main {
+        java.srcDir(files(generatedRoot)
+                .builtBy(lexerTasks, parserTasks))
+    }
+}
 
 tasks.withType(Test) {
     testLogging {
