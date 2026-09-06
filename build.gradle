@@ -83,7 +83,7 @@ def lexers = [
     [component: "tlaplus", flex: "tlaplus.flex", class: "_TLAplusLexer"],
     [component: "tlaplus", flex: "tlaplus_modulebegin.flex", class: "_TLAplusModuleBeginLexer"],
     [component: "tlaplus", flex: "tlaplus_plus_cal_comment.flex", class: "_TLAplusPlusCalCommentLexer"],
-    [component: "tlaplus/tlc", flex: "tlc_error_trace.flex", class: "_TLCErrorTraceLexer"],
+    [component: "tlc", flex: "tlc_error_trace.flex", class: "_TLCErrorTraceLexer"],
     [component: "tlc", flex: "tlc_config.flex", class: "_TLCConfigLexer"],
     [component: "pluscal", flex: "plus_cal_algorithmbegin.flex", class: "_PlusCalAlgorithmBeginLexer"],
 ]
