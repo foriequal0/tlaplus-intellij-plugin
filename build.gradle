@@ -39,7 +39,7 @@ dependencies {
     // We need to use same version of lsp4j as tla2tools to avoid incompatibility
     implementation "org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.21.1"
 
-    def lombokVersion = '1.18.24'
+    def lombokVersion = '1.18.48'
     compileOnly "org.projectlombok:lombok:$lombokVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     testCompileOnly "org.projectlombok:lombok:$lombokVersion"
